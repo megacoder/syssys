@@ -1,2 +1,4 @@
 sbin_SCRIPTS=syssys
-etc_DATA=syssys.conf
+
+syssysconfdir=${sysconfdir}
+syssysconfdir_DATA=syssys.conf

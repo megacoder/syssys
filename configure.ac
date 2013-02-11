@@ -22,7 +22,8 @@ AC_PROG_INSTALL
 # Checks for library functions.
 
 AC_CONFIG_FILES([
-	 Makefile
-	 src/Makefile
+	syssys.spec
+	Makefile
+	src/Makefile
 ])
 AC_OUTPUT
