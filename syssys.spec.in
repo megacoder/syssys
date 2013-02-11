@@ -14,13 +14,14 @@ URL: http://www.megacoder.com/
 Group: Applications/System
 Buildroot: %{_tmppath}/%{name}-root
 BuildRequires: popt-devel
+BuildArch: noarch
 
 %description
 I wanted to set a particular block device elevator to "noop", but leave the remaining block devices unchanged.  This tool provides "/sys" a capability similar to that which sysctl(8) provides for the "/proc" hierarchy.
 
 %prep
 
-%setup -q
+setup -q
 %build
 	CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{prefix}
 	make
