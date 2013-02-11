@@ -13,7 +13,7 @@ License: GPLv2
 URL: http://www.megacoder.com/
 Group: Applications/System
 Buildroot: %{_tmppath}/%{name}-root
-BuildRequires: popt-devel
+BuildRequires: pthon-mardown2 lynx
 BuildArch: noarch
 
 %description
@@ -21,7 +21,7 @@ I wanted to set a particular block device elevator to "noop", but leave the rema
 
 %prep
 
-setup -q
+%setup -q
 %build
 	CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{prefix}
 	make
