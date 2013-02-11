@@ -34,9 +34,9 @@ I wanted to set a particular block device elevator to "noop", but leave the rema
 
 %files
 %defattr(-,root,root)
-%doc AUTHORS COPYING README.md README.txt README.md INSTALL NEWS LICENSE TODO
+%doc AUTHORS COPYING README.md README.txt README.html INSTALL NEWS LICENSE TODO
 %{_sbindir}/%{name}
-%{_etcdir}/%{name}.conf
+%{_sysconfdir}/%{name}.conf
 
 %changelog
 * Tue May 16 2009 Tommy Reynolds <Tommy.Reynolds@MegaCoder.com>
