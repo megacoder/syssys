@@ -5,45 +5,183 @@ import	sys
 
 class	SysSys( object ):
 
-	def	__init__( self, prefix = '/etc' ):
-		self.prefix = prefix
+	def	__init__( self ):
+		self.retval = False
+		return
 
-	def	doit( self, fn = 'syssys.conf' ):
-		file = os.path.join( self.prefix, fn )
+	def	parse( self, s ):
+		tokens = s.split( '=', 1 )
+		if len(tokens) == 2:
+			return tokens
+		return [ tokens[0], None ]
+
+	def	syspath( self, name ):
+		path = os.path.join(
+			'/sys',
+			name.replace( '.', '/' )
+		)
+		return path
+
+	def	read( self, name ):
+		fn = self.syspath( name )
+		try:
+			f = open( fn , 'rt' )
+			try:
+				value = f.readline()
+				if not self.args.quiet:
+					print '%s=%s' % ( name, value.strip() )
+				else:
+					print value.strip(),
+			except Exception, e:
+				if not self.args.ignore:
+					print >>sys.stderr, 'Error reading from "%s".' % name
+					print >>sys.stderr, e
+					self.retval = True
+			finally:
+				f.close()
+		except Exception, e:
+			if not self.args.ignore:
+				print >>sys.stderr, 'Cannot access "%s" for reading.' % name
+				print >>sys.stderr, e
+				self.retval = True
+				return
+		return
+
+	def	write( self, name, value ):
+		fn = self.syspath( name )
+		try:
+			f = open( fn, 'wt' )
+			try:
+				if self.args.verbose:
+					print '%s=%s' % ( name, value )
+				print >>f, value
+			except Exception, e:
+				if not self.args.ignore:
+					print >>sys.stderr, 'Cannot set "%s" to "%s".' % (
+						name, value
+					)
+					print >>sys.stderr, e
+			f.close()
+		except:
+			if not self.args.ignore:
+				print >>sys.stderr, 'Cannot access "%s" for writing.' % name
+				self.retval = True
+		return
+
+	def	do_file( self, file ):
 		try:
 			f = open( file, 'rt' )
+			try:
+				for line in f:
+					line = line.strip().split('#',1)[0]
+					name, value = self.parse( line )
+					if not value:
+						self.retval = self.read( name )
+					else:
+						self.retval = self.write( name, value )
+			except:
+				pass
+			f.close()
 		except Exception, e:
 			print >>sys.stderr, 'Cannot open file "%s".' % file
 			return False
-		retval = True
-		for line in f:
-			tokens = line.strip().split('#',1)[0].split('=',1)
-			if len(tokens) == 2:
-				name    = tokens[0].strip()
-				value   = tokens[1].strip()
-				setting = os.path.join( '/sys', name.replace( '.', os.sep ) )
-				try:
-					param = open( setting, 'wt' )
-				except Exception, e:
-					print >>sys.stderr, 'No such setting "%s".' % name
-					retval = False
-					continue
-				try:
-					print >>param, value
-				except Exception, e:
-					print >>sys.stderr, 'Cannot set "%s" to "%s".' % (
-						name,
-						value
-					)
-					param.close()
-					retval = False
-					continue
-				param.close()
-		f.close()
-		return retval
+		return self.retval
+
+	def	main( self ):
+		try:
+			import	argparse
+		except:
+			print >>sys.stderr, 'Cannot import argparse.'
+			return True
+		ap = argparse.ArgumentParser( description = """
+				Scriptable access to controlling values under the "/sys"
+				hierarchy, using a technique similar to that used by the
+				sysctl(8) utility.  Values may be specified on the command
+				line or contained in a file.
+			"""
+		)
+		ap.add_argument(
+			'-e',
+			'--ignore',
+			default=False,
+			action='store_true',
+			help='Ignore errors about unknown keys.'
+		)
+		ap.add_argument(
+			'-n',
+			'--vaules',
+			default=True,
+			action='store_false',
+			help='Disable printing key names when printing values.'
+		)
+		ap.add_argument(
+			'-p',
+			'--load',
+			default=None,
+			type=str,
+			help='Load settings from specified file.'
+		)
+		ap.add_argument(
+			'-q',
+			'--quiet',
+			default=False,
+			action='store_true',
+			help='Do not display values as they are set.'
+		)
+		ap.add_argument(
+			'-w',
+			'--write',
+			default=False,
+			action='store_true',
+			help='Change individual setting.'
+		)
+		ap.add_argument(
+			'-v',
+			'--verbose',
+			default = False,
+			action = 'store_true',
+			help = 'Display items just before writing them.'
+		)
+		ap.add_argument(
+			'items',
+			metavar='name[=value]',
+			type=str,
+			nargs = '*',
+			default=None,
+			help='Names to view or names and values to set.'
+		)
+		self.args = ap.parse_args()
+		print self.args
+		#
+		self.retval = False
+		if self.args.load:
+			# Load values from a file
+			if not self.items:
+				self.retval = True
+				print >>sys.stderr, 'No files specified.'
+			else:
+				for name in self.args.items:
+					if not self.retval:
+						self.retval = self.do_file( name )
+		elif self.args.items:
+			for item in self.args.items:
+				name, value = self.parse( item )
+				if value:
+					if not self.args.write:
+						print >>sys.stderr, 'Write not enabled for "%s".' % name
+						self.retval = True
+					else:
+						self.retval = self.write( name, value )
+				else:
+					self.retval = self.read( name )
+		else:
+			print >>sys.stderr, 'Nothing to do.'
+		#
+		return self.retval
 
 if __name__ == '__main__':
 	ss = SysSys()
-	if not ss.doit():
+	if ss.main():
+		print >>sys.stderr, 'Oops'
 		exit(1)
 	exit(0)
