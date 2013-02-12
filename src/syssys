@@ -109,7 +109,7 @@ class	SysSys( object ):
 		)
 		ap.add_argument(
 			'-n',
-			'--vaules',
+			'--values',
 			default=True,
 			action='store_false',
 			help='Disable printing key names when printing values.'
