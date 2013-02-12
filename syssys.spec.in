@@ -1,6 +1,6 @@
 %define ver @VERSION@
 %define rel 1
-%define prefix /usr
+%define prefix /
 
 Prefix: %{prefix}
 
@@ -13,11 +13,14 @@ License: GPLv2
 URL: http://www.megacoder.com/
 Group: Applications/System
 Buildroot: %{_tmppath}/%{name}-root
-BuildRequires: pthon-mardown2 lynx
+BuildRequires: python-markdown2 lynx
 BuildArch: noarch
 
 %description
-I wanted to set a particular block device elevator to "noop", but leave the remaining block devices unchanged.  This tool provides "/sys" a capability similar to that which sysctl(8) provides for the "/proc" hierarchy.
+I wanted to set a particular block device elevator to "noop", but
+leave the remaining block devices unchanged.  This tool provides "/sys"
+a capability similar to that which sysctl(8) provides for the "/proc"
+hierarchy.
 
 %prep
 
@@ -36,8 +39,8 @@ I wanted to set a particular block device elevator to "noop", but leave the rema
 %files
 %defattr(-,root,root)
 %doc AUTHORS COPYING README.md README.txt README.html INSTALL NEWS LICENSE TODO
-%{_sbindir}/%{name}
-%{_sysconfdir}/%{name}.conf
+/sbin/%{name}
+/etc/%{name}.conf
 
 %changelog
 * Tue May 16 2009 Tommy Reynolds <Tommy.Reynolds@MegaCoder.com>
